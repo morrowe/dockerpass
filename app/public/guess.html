@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Угадай ID — бинарный поиск</title>
+    <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+    <main class="card">
+        <h1>Угадай ID</h1>
+        <p>Загадайте любой <b>id</b> из таблицы <code>requests</code>. Я угадаю его за ~7 вопросов «больше / не больше».</p>
+
+        <div id="start">
+            <button id="btnStart">Начать</button>
+        </div>
+
+        <div id="game" class="game-panel" hidden>
+            <p class="progress">Шаг <span id="step">1</span>. Диапазон: [<span id="lo">?</span>, <span id="hi">?</span>]</p>
+            <p class="question">Ваш id больше <b id="mid">?</b>?</p>
+            <div class="buttons">
+                <button id="btnYes">Да</button>
+                <button id="btnNo">Нет</button>
+            </div>
+            <div class="history" id="history"></div>
+        </div>
+
+        <div id="result"></div>
+    </main>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+
+        let lo = null, hi = null, mid = null, steps = 0;
+
+        async function loadRange() {
+            const res = await fetch('/api/guess/range');
+            const data = await res.json();
+
+            if (!data.total || data.total === '0') {
+                throw new Error('Таблица requests пуста — нечего угадывать');
+            }
+
+            lo = Number(data.min_id);
+            hi = Number(data.max_id);
+        }
+
+        function nextMid() {
+            return Math.floor((lo + hi) / 2);
+        }
+
+        function render() {
+            $('step').textContent = steps;
+            $('lo').textContent = lo;
+            $('hi').textContent = hi;
+            $('mid').textContent = mid;
+        }
+
+        function log(text) {
+            const el = $('history');
+            const line = document.createElement('div');
+            line.textContent = text;
+            el.appendChild(line);
+        }
+
+        async function finish() {
+            $('game').hidden = true;
+
+            try {
+                const res = await fetch(`/api/guess/item?id=${mid}`);
+                if (!res.ok) throw new Error('не найдено');
+
+                const item = await res.json();
+
+                $('result').innerHTML = `
+                    <div class="found">
+                        <div>✅ Угадал за <b>${steps}</b> шагов! Ваш id = <b>${item.id}</b></div>
+                        <dl>
+                            <dt>Фамилия</dt><dd>${escapeHtml(item.last_name)}</dd>
+                            <dt>Имя</dt><dd>${escapeHtml(item.first_name)}</dd>
+                            <dt>Отчество</dt><dd>${escapeHtml(item.middle_name)}</dd>
+                            <dt>Место рождения</dt><dd>${escapeHtml(item.birth_place)}</dd>
+                            <dt>Дата рождения</dt><dd>${escapeHtml(String(item.birth_date).slice(0, 10))}</dd>
+                            <dt>Пол</dt><dd>${escapeHtml(item.gender)}</dd>
+                            <dt>Телефон</dt><dd>${escapeHtml(item.phone)}</dd>
+                            <dt>Создано</dt><dd>${item.created_at}</dd>
+                        </dl>
+                        <button onclick="location.reload()">Ещё раз</button>
+                    </div>
+                `;
+            } catch (e) {
+                $('result').innerHTML = `<p class="error">Ошибка загрузки записи: ${e.message}</p>`;
+            }
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+            }[c]));
+        }
+
+        function answerYes() {
+            log(`> ${mid} → да`);
+            lo = mid + 1;
+            step();
+        }
+
+        function answerNo() {
+            
+            log(`> ${mid} → нет`);
+            hi = mid;
+            step();
+        }
+
+        function step() {
+            if (lo >= hi) {
+                mid = lo;            
+                finish();
+                return;
+            }
+
+            mid = nextMid();
+            steps++;
+            render();
+        }
+
+        async function start() {
+            $('start').hidden = true;
+            $('game').hidden = false;
+            $('result').innerHTML = '';
+            $('history').innerHTML = '';
+
+            try {
+                await loadRange();
+            } catch (e) {
+                $('game').hidden = true;
+                $('result').innerHTML = `<p class="error">${e.message}</p>`;
+                return;
+            }
+
+            mid = nextMid();
+            steps = 1;
+            render();
+
+            $('btnYes').onclick = answerYes;
+            $('btnNo').onclick = answerNo;
+        }
+
+        $('btnStart').onclick = start;
+    </script>
+</body>
+</html>

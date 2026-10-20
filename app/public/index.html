@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+    <main class="card">
+        <h1>Регистрация</h1>
+        <form id="requestForm">
+            <h2>Личные данные</h2>
+            <label>Фамилия<input type="text" name="lastName" autocomplete="family-name" required /></label>
+            <label>Имя<input type="text" name="firstName" autocomplete="given-name" required /></label>
+            <label>Отчество<input type="text" name="middleName" autocomplete="additional-name" /></label>
+            <label>Место рождения<input type="text" name="birthPlace" required /></label>
+            <label>Дата рождения<input type="date" name="birthDate" required /></label>
+            <label>Пол
+                <select name="gender" required>
+                    <option value="" disabled selected>Выберите пол</option>
+                    <option value="Мужской">Мужской</option>
+                    <option value="Женский">Женский</option>
+                </select>
+            </label>
+            <label>Номер телефона<input type="tel" name="phone" autocomplete="tel" placeholder="+7 (___) ___-__-__" required /></label>
+
+            <h2>Паспортные данные</h2>
+            <label>Серия паспорта<input type="text" name="passportSeries" inputmode="numeric" maxlength="4" placeholder="1234" required /></label>
+            <label>Номер паспорта<input type="text" name="passportNumber" inputmode="numeric" maxlength="6" placeholder="123456" required /></label>
+            <label>Дата выдачи<input type="date" name="issueDate" required /></label>
+            <label>Код подразделения<input type="text" name="divisionCode" maxlength="7" placeholder="123-456" required /></label>
+            <label>Кем выдан<input type="text" name="issuedBy" required /></label>
+            <button type="submit">Сохранить анкету</button>
+        </form>
+        <p id="status" role="status"></p>
+        <p><a href="/guess">Перейти к бинарному поиску ID</a></p>
+    </main>
+    <script>
+        const form = document.getElementById('requestForm');
+        const status = document.getElementById('status');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const data = Object.fromEntries(new FormData(form));
+            try {
+                const response = await fetch('/requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Не удалось сохранить анкету');
+                status.textContent = `${result.message}. ID заявки: ${result.id}. ID человека: ${result.personId}`;
+                form.reset();
+            } catch (error) {
+                status.textContent = error.message || 'Ошибка сохранения';
+            }
+        });
+    </script>
+</body>
+</html>

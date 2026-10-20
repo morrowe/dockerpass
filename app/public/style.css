@@ -1,0 +1,133 @@
+* { 
+    box-sizing: border-box; 
+}
+
+:root {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #2c3e50;
+    background: #f4f7f5; 
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    padding: 40px 20px;
+}
+
+button, input, select, textarea { 
+    font: inherit; 
+}
+
+main.card {
+    width: min(760px, 100%);
+    margin: 0 auto;
+    padding: 34px 40px;
+    border: 1px solid #dcdfdc;
+    border-radius: 12px;
+    background: #fff;
+}
+
+h1 {
+    margin: 0 0 24px;
+    color: #1b5e20; 
+    font-size: 28px;
+    letter-spacing: -0.02em;
+}
+
+form h2 {
+    margin: 28px 0 16px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e8f5e9;
+    color: #2e7d32; 
+    font-size: 16px;
+    font-weight: 600;
+}
+
+form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+    color: #455a64;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+form input, form select {
+    display: block;
+    width: 35%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 6px;
+    outline: none;
+    background: #fafafa;
+    color: #263238;
+    font-size: 14px;
+    transition: all 0.15s ease;
+}
+
+form input:focus, form select:focus {
+    border-color: #2e7d32;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+form input::placeholder {
+    color: #90a4ae;
+}
+
+form input[type="date"] {
+    color-scheme: light;
+}
+
+main.card button[type="submit"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 46px;
+    margin-top: 28px;
+    border: 0;
+    border-radius: 6px;
+    background: #2e7d32;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+main.card button[type="submit"]:hover {
+    background: #1b5e20;
+}
+
+main.card button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#status {
+    margin: 16px 0 0;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Ссылка под формой */
+main.card p a {
+    color: #2e7d32;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+main.card p a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    body { padding: 16px 10px; }
+    main.card { padding: 24px 20px; border-radius: 8px; }
+    h1 { font-size: 24px; }
+}
